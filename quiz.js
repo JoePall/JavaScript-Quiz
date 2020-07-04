@@ -66,7 +66,10 @@ var game = {
         var result = "Game Over!<br><br>High Scores<br>";
         $.each(highScores, (i, score) => {
             var text = score[0] + ": " + score[1];
-            if (text == ($("#player-name").val() + ": " + score)) result += "<b>" + text + "</b><br>";
+            var current = ($("#player-name").val() + ": " + game.score);
+            if (text == current) {
+                result += "<strong>" + text + "</strong><br>";
+            }
             else result += text + "<br>";
         });
         $("#status").html(result);
