@@ -79,12 +79,13 @@ var game = {
         game.stopTimer();
 
         $("#player-name").fadeIn(1);
+        $("save-score-button").fadeIn(1);
+        $("#status").html("Game Over!");
+    },
 
+    saveScore: () => {
         highScores = game.storeHighScores();
-
-        // Display Results Title
-        $("#status").html("Game Over!<br>High Scores<br>");
-
+        
         // Display results summary with current result highlighted if on the leaderboard
         var result = "";
         var highlighted = false;
@@ -190,6 +191,7 @@ var game = {
 
 $("#reset-button").click(() => game.resetHighScores());
 $("#start-button").click(() => game.startQuiz());
+$("save-score-button").click(() => game.saveScore());
 $(document).ready(() => {
     $("#question-options").click((event) => {
         game.onResponse(event.target.value);
