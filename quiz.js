@@ -7,37 +7,57 @@ var game = {
     allotedTime: 120,
     elapsedTime: 0,
 
-    // JavaScript fundamentals questions
-    questions: [["Is JavaScript case sensitive?", true],
-    ['Is <code>==</code> type sensitive?', false],
-    ['Is <code>var array = {};</code> a valid implementation of an array?', false],
-    ['Is <code>alert("Are you sure about this?");</code> valid in JavaScript?', true],
-    ['Is <code>for (let i = 0; i < array.length; i++)</code> a valid for loop in JavaScript?', true],
-    ['Is <code>(7 => 5)</code> valid in JavaScript?', false]],
+    // JavaScript fundamentals questions and answers
+    questions: [{
+        text: "Commonly used Data Types in JavaScript do not include:",
+        options: ["strings", "booleans", "alerts", "numbers"],
+        answer: "2"
+    },
+    {
+        text: "Arrays in JavaScript can be used to store _____.",
+        options: ["strings", "booleans", "alerts", "numbers"],
+        answer: "1"
+    },
+    {
+        text: "The condition of an if/else statement is enclosed within: ",
+        options: ["paranthesis", "square brackets", "curly brackets", "commas"],
+        answer: "4"
+    }
+    ],
 
     // Initialize default values
     init: () => {
-        // Hide quiz buttons and display start button
-        $("#start-button").fadeIn(1);
-        $("#yes-button").fadeOut(1);
-        $("#no-button").fadeOut(1);
-
-        // Sets the allotted time based on the amount of questions
+        game.elapsedTime = 0;
+        game.score = 0;
         game.allotedTime = game.questions.length * 15;
+        
+        game.displayInitHTML(); // Sets the allotted time based on the amount of questions
     },
 
-    // Displays a question to the user
-    askQuestion: () => $("#status").html(game.questions[game.questionIndex][0]),
+    // Displays question and associated options
+    askQuestion: () => {
+        var question = game.questions[game.questionIndex];
+
+        for (let i = 0; i < 4; i++) {
+            var n = (i + 1);
+            $("#button-" + n).html(n + ". " + question["options"][i]);
+        }
+
+        $("#status").html(question["text"])
+    },
 
     // Handles the users response to the question
     onResponse: (response) => {
-        // If the users answer matched the games answer increment the score by 1 and display it.
-        if (response == game.questions[game.questionIndex][1]) {
-            $("#score").html("Score: " + ++game.score);
-        }
+        // If the users answer matched the games answer, increment the score by 1 and display it
+        var answer = response == game.questions[game.questionIndex]["answer"];
+        if (answer) $("#score").html("Score: " + (++game.score));
 
-        // Stops the game if there are no more questions, otherwise ask the next question.
-        if (++game.questionIndex >= game.questions.length) game.stopQuiz();
+        game.displayAnswerResult(answer);
+
+        game.questionIndex++;
+
+        // Stops the game if there are no more questions, otherwise ask the next question
+        if (game.questionIndex == game.questions.length) game.stopQuiz();
         else game.askQuestion();
     },
 
@@ -47,11 +67,7 @@ var game = {
         game.questionIndex = 0;
         game.score = 0;
 
-        // Display quiz buttons and hide start button
-        $("#start-button").fadeOut(10);
-        $("#yes-button").fadeIn(10);
-        $("#no-button").fadeIn(10);
-        $("#player-name").fadeOut(10);
+        game.displayQuizHTML();
 
         //Begin Game
         game.startTimer();
@@ -61,23 +77,29 @@ var game = {
     // Stops the Quiz
     stopQuiz: () => {
         game.stopTimer();
+
+        $("#player-name").fadeIn(1);
+
         highScores = game.storeHighScores();
 
-        var result = "Game Over!<br><br>High Scores<br>";
+        // Display Results Title
+        $("#status").html("Game Over!<br>High Scores<br>");
+
+        // Display results summary with current result highlighted if on the leaderboard
+        var result = "";
+        var highlighted = false;
         $.each(highScores, (i, score) => {
             var text = score[0] + ": " + score[1];
             var current = ($("#player-name").val() + ": " + game.score);
-            if (text == current) {
+
+            if (text == current && !highlighted) {
                 result += "<strong>" + text + "</strong><br>";
+                highlighted = true;
             }
             else result += text + "<br>";
         });
-        $("#status").html(result);
-
-        $("#start-button").fadeIn(10);
-        $("#yes-button").fadeOut(10);
-        $("#no-button").fadeOut(10);
-        $("#player-name").fadeIn(10);
+        $("#results").html(result);
+        game.displayResultHTML();
     },
 
     // Starts the timer
@@ -110,26 +132,67 @@ var game = {
             // Add the value
             highScores.push(value);
 
-            // Sort all and get top 5
+            // Sort all
             highScores = highScores.sort((a, b) => b[1] - a[1]);
-
-            console.log(highScores);
-
         }
 
+        // Get top 5 if needed
         if (highScores.length > 5) {
             highScores.splice(5);
         }
 
-        // Save the top 5
+        // Save the scores
         localStorage.setItem("highScores", JSON.stringify(highScores));
 
         return highScores;
     },
+
+    resetHighScores: () => {
+        localStorage.removeItem("highScores");
+        $("#results").html("");
+    },
+
+    displayAnswerResult: (answer) => {
+        $("#answer-result").fadeIn(10);
+        setTimeout(() => {
+            if (answer) $("#answer-result").html("You are right!") 
+            else $("#answer-result").html("You are wrong!") 
+            $("#answer-result").fadeOut(500);
+        }, 5000);
+    },
+
+    displayResultHTML: () => {
+        $("#start-button").fadeIn(1);
+        $("#reset-button").fadeIn(1);
+        $("#question-options").fadeOut(1);
+        $("#player-name").fadeIn(1);
+        $("#results").fadeIn(1);
+    },
+
+    displayQuizHTML: () => {
+        $("#start-button").fadeOut(1);
+        $("#reset-button").fadeOut(1);
+        $("#question-options").fadeIn(1);
+        $("#player-name").fadeOut(1);
+        $("#results").fadeOut(1);
+    },
+
+    displayInitHTML: () => {
+        $("#score").html("Score: 0");
+        $("#timer").html(game.allotedTime + " seconds left");
+        $("#start-button").fadeIn(1);
+        $("#reset-button").fadeOut(1);
+        $("#question-options").fadeOut(1);
+        $("#player-name").fadeIn(1);
+        $("#results").fadeOut(1);
+    },
 }
 
+$("#reset-button").click(() => game.resetHighScores());
 $("#start-button").click(() => game.startQuiz());
-$("#no-button").click(() => game.onResponse(false));
-$("#yes-button").click(() => game.onResponse(true));
-
+$(document).ready(() => {
+    $("#question-options").click((event) => {
+        game.onResponse(event.target.value);
+    });
+});
 game.init();
