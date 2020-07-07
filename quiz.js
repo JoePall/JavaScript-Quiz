@@ -64,6 +64,9 @@ var game = {
         // Set default values for variables
         game.init();
 
+        // Display score
+        $("#score").html("Score: 0");
+
         // Begin Quiz
         game.startTimer();
         game.showInQuizHTML();
@@ -100,11 +103,12 @@ var game = {
 
     // Gets an ordered list with the high scores (highlights entry if applicable) 
     getHighScoresHTML: () => {
-        var result = "<ol>";
+        var result = "";
         var myEntry = ($("#name").val() + ": " + game.score);
-
+        
         var highlighted = false;
         var highScores = JSON.parse(localStorage.getItem("highScores"));
+        if (!highScores > 0) return;
         $.each(highScores, (i, score) => {
             var text = score[0] + ": " + score[1];
 
@@ -116,10 +120,8 @@ var game = {
             }
             else result += text;
 
-            result += "<br></li>";
+            result += "</li>";
         });
-
-        result += "</ol>"
 
         return result;
     },
