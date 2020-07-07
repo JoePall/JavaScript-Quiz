@@ -17,46 +17,31 @@
     <header>
         <nav class="navbar fixed-top">
             <div class="navbar-nav mr-auto">
-                <button id="view-high-score" type="button" class="btn btn-outline-primary" data-toggle="modal"
-                    data-target="#results-modal">view high scores</button>
-                <div class="modal fade" id="results-modal" tabindex="-1" role="dialog" aria-labelledby="results"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered" role="document">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="high-scores-title">High Scores</h5>
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <p id="results-modal-text" class="lead"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <button id="view-high-scores" type="button" class="btn btn-outline-primary before-quiz after-quiz">view high scores</button>
             </div>
             <div class="form-inline mt-2 mt-md-0">
-                <p class="display-5 text-muted"><span id="timer"></span> | <span id="score"></span></p>
+                <p class="display-5 text-muted in-quiz"><span id="timer"></span> | <span id="score"></span></p>
             </div>
         </nav>
     </header>
 
-    <main role="main" class="flex-shrink-0 m-5 text-center">
-        <div class="container text-center p-5 w-50">
-            <p id="status" class="display-4" style="font-size: 35px;"></p>
-            <p id="results" class="lead" style="font-size: 28px;"></p>
-            <div id="save-option" class="input-group input-group-lg">
-                <input id="player-name" type="text" class="form-control" aria-label="Large"
-                    aria-describedby="inputGroup-sizing-sm">
-                <button id="save-score-button" type="button" class="btn btn-outline-primary">Save Score</button>
+    <main role="main" class="flex-shrink-0 m-5">
+        <div class="container card p-5 w-75 text-center">
+            <h2>JavaScript Quiz</h2>
+            <h3 id="subtitle" class="after-quiz show-high-scores"></h3>
+            <hr>
+            <button id="start" type="button" class="btn btn-lg btn-primary before-quiz show-high-scores w-50 mx-auto">Start</button>
+            <p id="question" class="display-4 in-quiz"></p>
+            <p id="results" class="lead mt-3 show-high-scores text-center w-50 mx-auto"></p>
+            <div class="input-group input-group-lg after-quiz">
+                <input id="name" type="text" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm">
+                <button id="save" type="button" class="btn btn-outline-success">Save Score</button>
             </div>
+            <button id="reset" type="button" class="btn btn-lg btn-danger show-high-scores mt-3 mx-auto w-50">Reset High Scores</button>
         </div>
-        <button id="reset-button" type="button" class="btn btn-outline-primary">Reset High Scores</button>
     </main>
 
-    <footer class="footer mt-auto text-center bg-dark p-5">
-        <button id="start-button" type="button" class="w-25 mx-auto btn btn-lg btn-primary">Start</button>
+    <footer class="footer mt-auto text-center bg-dark p-5 in-quiz">
         <div id="question-options" class="container">
             <button id="button-1" value="1" type="button" class="btn col-xs-3 btn-lg btn-primary"></button>
             <button id="button-2" value="2" type="button" class="btn col-xs-3 btn-lg btn-primary"></button>

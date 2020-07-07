@@ -1,7 +1,7 @@
 // JavaScript Quiz Game
 var game = {
-    highScores: [],
     score: 0,
+    playerName: "",
     questionIndex: 0,
     timerInterval: "",
     allotedTime: 120,
@@ -27,33 +27,37 @@ var game = {
 
     // Initialize default values
     init: () => {
+        // Sets the allotted time based on the amount of questions
+        game.allotedTime = game.questions.length * 15;
+
         game.elapsedTime = 0;
         game.score = 0;
-        game.allotedTime = game.questions.length * 15;
         game.result = "";
-        
-        game.displayInitHTML(); // Sets the allotted time based on the amount of questions
+        game.questionIndex = 0;
+
+        $("#score").html("Score: 0");
+        $("#timer").html(game.allotedTime + " seconds left");
+
+        game.showBeforeQuizHTML();
     },
 
     // Displays question and associated options
     askQuestion: () => {
         var question = game.questions[game.questionIndex];
 
-        for (let i = 0; i < 4; i++) {
-            var n = (i + 1);
-            $("#button-" + n).html(n + ". " + question["options"][i]);
-        }
+        $("#question-options > button").each((i) =>
+            $("#button-" + (i + 1)).html((i + 1) + ". " + question["options"][i]));
 
-        $("#status").html(question["text"])
+        $("#question").html(question["text"]);
     },
 
     // Handles the users response to the question
     onResponse: (response) => {
         // If the users answer matched the games answer, increment the score by 1 and display it
-        var answer = response == game.questions[game.questionIndex]["answer"];
+        var answer = (response == game.questions[game.questionIndex]["answer"]);
         if (answer) $("#score").html("Score: " + (++game.score));
 
-        game.displayAnswerResult(answer);
+        // game.showAnswerResult(answer);
 
         game.questionIndex++;
 
@@ -65,10 +69,9 @@ var game = {
     // Starts the Quiz 
     startQuiz: () => {
         // Set Default Values for variables
-        game.questionIndex = 0;
-        game.score = 0;
+        game.init();
 
-        game.displayQuizHTML();
+        game.showInQuizHTML();
 
         //Begin Game
         game.startTimer();
@@ -79,41 +82,50 @@ var game = {
     stopQuiz: () => {
         game.stopTimer();
 
-        $("#save-option").fadeIn(1);
-        $("#status").html("Game Over!");
+        $("#subtitle").html("Game Over!");
+        game.showAfterQuizHTML();
     },
 
     saveScore: () => {
-        $("#save-option").fadeOut(1);
+        game.playerName = $("#name").val();
 
-        game.storeHighScores();
-        
+        if (game.score > 0 && game.playerName.length > 0) {
+            game.setHighScores();
+        }
+
+        game.showHighScores();
+    },
+
+    showHighScores: () => {
         var result = game.getHighScoresHTML();
-        
+
         $("#results").html(result);
-        game.displayResultHTML();
+
+        game.showHighScoresHTML();
     },
 
-    viewHighScoresModal: () => {
-        var results = game.getHighScoresHTML();
-
-        $("#results-modal-text").html(results);
-    },
-
+    // Gets an ordered list with the 
     getHighScoresHTML: () => {
-        var result = "";
+        var result = "<ol>";
+        var myEntry = ($("#name").val() + ": " + game.score);
 
         var highlighted = false;
-        $.each(game.highScores, (i, score) => {
+        var highScores = JSON.parse(localStorage.getItem("highScores"));
+        $.each(highScores, (i, score) => {
             var text = score[0] + ": " + score[1];
-            var current = ($("#player-name").val() + ": " + game.score);
 
-            if (text == current && !highlighted) {
-                result += "<strong>" + text + "</strong><br>";
+            result += "<li>";
+
+            if (text == myEntry && !highlighted) {
+                result += "<strong>" + text + "</strong>";
                 highlighted = true;
             }
-            else result += text + "<br>";
+            else result += text;
+
+            result += "<br></li>";
         });
+
+        result += "</ol>"
 
         return result;
     },
@@ -138,15 +150,15 @@ var game = {
     },
 
     // Updates the high scores and stores to local storage
-    storeHighScores: () => {
+    setHighScores: () => {
         // Get the current high scores
         var highScores = JSON.parse(localStorage.getItem("highScores"));
-        var value = [$("#player-name").val(), game.score];
+        var myScore = [game.playerName, game.score];
 
-        if (highScores == undefined) highScores = [value];
+        if (highScores == undefined) highScores = [myScore];
         else {
             // Add the value
-            highScores.push(value);
+            highScores.push(myScore);
 
             // Sort all
             highScores = highScores.sort((a, b) => b[1] - a[1]);
@@ -159,8 +171,6 @@ var game = {
 
         // Save the scores
         localStorage.setItem("highScores", JSON.stringify(highScores));
-
-        game.highScores = highScores;
     },
 
     resetHighScores: () => {
@@ -168,46 +178,37 @@ var game = {
         $("#results").html("");
     },
 
-    displayAnswerResult: (answer) => {
-        $("#answer-result").fadeIn(10);
-        setTimeout(() => {
-            if (answer) $("#answer-result").html("You are right!") 
-            else $("#answer-result").html("You are wrong!") 
-            $("#answer-result").fadeOut(500);
-        }, 5000);
+    // Showing and hiding of HTML based on state
+    quizStates: [".before-quiz", ".in-quiz", ".after-quiz", ".show-high-scores"],
+
+    showBeforeQuizHTML: () => {
+        game.showHTML(game.quizStates[0]);
     },
 
-    displayResultHTML: () => {
-        $("#start-button").fadeIn(1);
-        $("#question-options").fadeOut(1);
-        $("#reset-button").fadeIn(1);
-        $("#results").fadeIn(1);
-        $("#save-option").fadeOut(1);
+    showInQuizHTML: () => {
+        game.showHTML(game.quizStates[1]);
     },
 
-    displayQuizHTML: () => {
-        $("#start-button").fadeOut(1);
-        $("#question-options").fadeIn(1);
-        $("#reset-button").fadeOut(1);
-        $("#question-options").fadeIn(1);
-        $("#results").fadeOut(1);
+    showAfterQuizHTML: () => {
+        game.showHTML(game.quizStates[2]);
     },
 
-    displayInitHTML: () => {
-        $("#start-button").fadeIn(1);
-        $("#question-options").fadeOut(1);
-        $("#reset-button").fadeOut(1);
-        $("#score").html("Score: 0");
-        $("#timer").html(game.allotedTime + " seconds left");
-        $("#results").fadeOut(1);
-        $("#save-option").fadeOut(1);
+    showHighScoresHTML: () => {
+
+        game.showHTML(game.quizStates[3]);
+    },
+
+    showHTML: (selectedState) => {
+        game.quizStates.forEach(state => $(state).fadeOut(1));
+        $(selectedState).fadeIn(1);
     },
 }
 
-$("#reset-button").click(() => game.resetHighScores());
-$("#start-button").click(() => game.startQuiz());
-$("#save-score-button").click(() => game.saveScore());
-$("#view-high-score").click(() => game.viewHighScoresModal());
+$("#start").click(() => game.startQuiz());
+$("#save").click(() => game.saveScore());
+$("#reset").click(() => game.resetHighScores());
+$("#view-high-scores").click(() => game.showHighScores());
+
 $(document).ready(() => {
     $("#question-options").click((event) => {
         game.onResponse(event.target.value);
