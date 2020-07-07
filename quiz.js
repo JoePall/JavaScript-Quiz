@@ -5,7 +5,6 @@ var game = {
     questionIndex: 0,
     timerInterval: "",
     allotedTime: 120,
-    elapsedTime: 0,
 
     // JavaScript fundamentals questions and answers
     questions: [{
@@ -30,13 +29,9 @@ var game = {
         // Sets the allotted time based on the amount of questions
         game.allotedTime = game.questions.length * 15;
 
-        game.elapsedTime = 0;
         game.score = 0;
         game.result = "";
         game.questionIndex = 0;
-
-        $("#score").html("Score: 0");
-        $("#timer").html(game.allotedTime + " seconds left");
 
         game.showBeforeQuizHTML();
     },
@@ -57,9 +52,7 @@ var game = {
         var answer = (response == game.questions[game.questionIndex]["answer"]);
         if (answer) $("#score").html("Score: " + (++game.score));
 
-        // game.showAnswerResult(answer);
-
-        game.questionIndex++;
+        game.questionIndex++; // Move to next question
 
         // Stops the game if there are no more questions, otherwise ask the next question
         if (game.questionIndex == game.questions.length) game.stopQuiz();
@@ -68,34 +61,35 @@ var game = {
 
     // Starts the Quiz 
     startQuiz: () => {
-        // Set Default Values for variables
+        // Set default values for variables
         game.init();
 
-        game.showInQuizHTML();
-
-        //Begin Game
+        // Begin Quiz
         game.startTimer();
+        game.showInQuizHTML();
         game.askQuestion();
     },
 
     // Stops the Quiz
     stopQuiz: () => {
-        game.stopTimer();
+        clearInterval(game.timerInterval); // Stop timer
 
         $("#subtitle").html("Game Over!");
+
         game.showAfterQuizHTML();
     },
 
+    // Saves score then displays high scores
     saveScore: () => {
         game.playerName = $("#name").val();
 
-        if (game.score > 0 && game.playerName.length > 0) {
+        if (game.score > 0 && game.playerName.length > 0) 
             game.setHighScores();
-        }
 
         game.showHighScores();
     },
 
+    // Shows the high scores
     showHighScores: () => {
         var result = game.getHighScoresHTML();
 
@@ -104,7 +98,7 @@ var game = {
         game.showHighScoresHTML();
     },
 
-    // Gets an ordered list with the 
+    // Gets an ordered list with the high scores (highlights entry if applicable) 
     getHighScoresHTML: () => {
         var result = "<ol>";
         var myEntry = ($("#name").val() + ": " + game.score);
@@ -130,73 +124,50 @@ var game = {
         return result;
     },
 
-    // Starts the timer
+    // Starts the quiz timer
     startTimer: () => {
         var timeLeft = game.allotedTime;
+        $("#timer").html(timeLeft-- + " seconds left");
         game.timerInterval = setInterval(() => {
             $("#timer").html(timeLeft + " seconds left");
             timeLeft--;
-            if (timeLeft < 0) {
-                clearInterval(game.timerInterval);
-                game.stopQuiz();
-            }
+            
+            if (timeLeft < 0) game.stopQuiz(); // Stop when time runs out.
         }, 1000);
-    },
-
-    // Stops the timer
-    stopTimer: () => {
-        clearInterval(game.timerInterval);
-        game.elapsedTime = 0;
     },
 
     // Updates the high scores and stores to local storage
     setHighScores: () => {
+
         // Get the current high scores
         var highScores = JSON.parse(localStorage.getItem("highScores"));
         var myScore = [game.playerName, game.score];
 
+        // Create an array if none exists, otherwise add the entry and sort and return top 5
         if (highScores == undefined) highScores = [myScore];
         else {
-            // Add the value
             highScores.push(myScore);
-
-            // Sort all
             highScores = highScores.sort((a, b) => b[1] - a[1]);
-        }
-
-        // Get top 5 if needed
-        if (highScores.length > 5) {
-            highScores.splice(5);
+            if (highScores.length > 5) highScores.splice(5);
         }
 
         // Save the scores
         localStorage.setItem("highScores", JSON.stringify(highScores));
     },
 
+    // removes highScores and content of results
     resetHighScores: () => {
         localStorage.removeItem("highScores");
         $("#results").html("");
     },
 
-    // Showing and hiding of HTML based on state
+    // Shows or hides HTML based on quiz state
     quizStates: [".before-quiz", ".in-quiz", ".after-quiz", ".show-high-scores"],
 
-    showBeforeQuizHTML: () => {
-        game.showHTML(game.quizStates[0]);
-    },
-
-    showInQuizHTML: () => {
-        game.showHTML(game.quizStates[1]);
-    },
-
-    showAfterQuizHTML: () => {
-        game.showHTML(game.quizStates[2]);
-    },
-
-    showHighScoresHTML: () => {
-
-        game.showHTML(game.quizStates[3]);
-    },
+    showBeforeQuizHTML: () => game.showHTML(game.quizStates[0]),
+    showInQuizHTML: () => game.showHTML(game.quizStates[1]),
+    showAfterQuizHTML: () => game.showHTML(game.quizStates[2]),
+    showHighScoresHTML: () => game.showHTML(game.quizStates[3]),
 
     showHTML: (selectedState) => {
         game.quizStates.forEach(state => $(state).fadeOut(1));
