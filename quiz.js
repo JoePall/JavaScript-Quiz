@@ -4,25 +4,39 @@ var game = {
     playerName: "",
     questionIndex: 0,
     timerInterval: "",
-    allotedTime: 120,
+    allotedTime: 0,
 
     // JavaScript fundamentals questions and answers
     questions: [{
-        text: "Commonly used Data Types in JavaScript do not include:",
-        options: ["strings", "booleans", "alerts", "numbers"],
-        answer: "2"
+        text: "What tag should we use to put JavaScript in?",
+        options: ["<java>", "<js>", "<script>", "<JavaScript>"],
+        answer: "3"
     },
     {
-        text: "Arrays in JavaScript can be used to store _____.",
-        options: ["strings", "booleans", "alerts", "numbers"],
+        text: "Arrays in JavaScript are created with ____?",
+        options: ["<>", "()", "{}", "[]"],
+        answer: "4"
+    },
+    {
+        text: "The condition of an if/else statement is enclosed with _____?",
+        options: ["paranthesis", "square brackets", "curly brackets", "commas"],
         answer: "1"
     },
     {
-        text: "The condition of an if/else statement is enclosed within: ",
-        options: ["paranthesis", "square brackets", "curly brackets", "commas"],
-        answer: "4"
-    }
-    ],
+        text: "What is a JavaScript statement terminator?",
+        options: ["#", ";", "$", "%"],
+        answer: "2"
+    },
+    {
+        text: 'The variable "x" is set to 5 with _______?',
+        options: ["x >> 5;", "x = 5;", "x == 5;", "x.set(5);"],
+        answer: "2"
+    },
+    {
+        text: "A JavaScript class is enclosed with ____?",
+        options: ["<>", "()", "{}", "[]"],
+        answer: "3"
+    }],
 
     // Initialize default values
     init: () => {
@@ -41,7 +55,7 @@ var game = {
         var question = game.questions[game.questionIndex];
 
         $("#question-options > button").each((i) =>
-            $("#button-" + (i + 1)).html((i + 1) + ". " + question["options"][i]));
+            $("#button-" + (i + 1)).text((i + 1) + ". " + question["options"][i]));
 
         $("#question").html(question["text"]);
     },
